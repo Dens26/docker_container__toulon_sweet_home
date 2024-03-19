@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+
+    # Service PHP with Apache
+    server:
+        build: docker
+        image: ${PREFIX}_server:1.1.0
+        container_name: ${PREFIX}_server
+        volumes:
+            - server:/var/www/
+            - ./docker/vhosts:/etc/apache2/sites-enabled
+        ports:
+            - "${WWW_PORT}:80"
+        networks:
+            - default
+
+    mysql:
+        image: mysql
+        container_name: ${PREFIX}_mysql
+        volumes:
+            - mysql:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        ports:
+            - "${MYSQL_PORT}:3306"
+        networks:
+            - default
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: ${PREFIX}_phpmyadmin
+        environment:
+            PMA_HOST: mysql
+            PMA_PORT: 3306
+            PMA_ARBITRARY: 1
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        ports:
+            - ${PHPMYADMIN_PORT}:80
+        depends_on:
+            - mysql
+        networks:
+            - default
+
+networks:
+    default:
+        name: ${PREFIX}_${NETWORK_NAME}
+
+volumes:
+    server:
+    mysql:

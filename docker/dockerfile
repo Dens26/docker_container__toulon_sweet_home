@@ -1,0 +1,35 @@
+FROM php:apache
+
+# Explicitly specifies the server name
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
+# Composer
+RUN curl -sSk https://getcomposer.org/installer | php -- --disable-tls && \
+    mv composer.phar /usr/local/bin/composer
+
+# Dependencies System and Apache
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    locales \
+    apt-utils \
+    git \
+    libicu-dev \
+    g++ \
+    libpng-dev \
+    libxml2-dev \
+    libzip-dev \
+    libonig-dev \
+    libxslt-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Configure and install PHP extensions
+RUN docker-php-ext-configure intl
+RUN docker-php-ext-install -j$(nproc) pdo pdo_mysql gd opcache intl zip calendar dom mbstring xsl
+
+# Local config & UTF-8
+RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+    echo "fr_FR.UTF-8 UTF-8" >> /etc/locale.gen && \
+    locale-gen && \
+    echo "default_charset = 'UTF-8'" >> /usr/local/etc/php/php.ini
+
+# Working directory
+WORKDIR /var/www/
