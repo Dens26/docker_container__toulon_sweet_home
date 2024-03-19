@@ -15,9 +15,9 @@ Création du container
 >   docker-compose up -d
 ```
 
-Liste des services en cours
+Liste des containers en cours
 ```
->   docker -ps
+>   docker ps
 ```
 
 ### BASH
